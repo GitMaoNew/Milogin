@@ -5,4 +5,5 @@
 ## 注意事项
 脚本依赖 Crypto 库，用于生成加密字符串，Python原生没有自带，需要自行安装
 ## 详细说明（原理以及实现过程）
-请参考 http://www.92ez.com/index.php?action=show&id=23373
+登录部分 http://www.92ez.com/index.php?action=show&id=23373
+功能部分 http://www.92ez.com/?action=show&id=23405 
