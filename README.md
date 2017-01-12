@@ -5,7 +5,7 @@
 ## 注意事项
 脚本依赖 Crypto 库，用于生成加密字符串，Python原生没有自带，需要自行安装
 ## 截图
-![](http://www.92ez.com/attachments/date_201609/b3321eb84f8e28f7e0fc87cd64c797c8.png)
+![](http://www.92ez.com/attachments/date_201701/thumb_3e659a7b3d12978ea74f7feb1f1b991c.png)
 
 ## 详细说明（原理以及实现过程）
 登录部分 http://www.92ez.com/index.php?action=show&id=23373
