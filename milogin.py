@@ -72,65 +72,72 @@ def getInfo(host, token):
 
 def getStatus(url):
     try:
-        statusInfo = json.loads(requests.get(url,timeout=5).content)
+        statusInfo = json.loads(requests.get(url, timeout=5).content)
+
         devList = statusInfo['dev']
 
-        print '[CPU]: ' + str(statusInfo['cpu']['core']) + '核   ' + statusInfo['cpu']['hz'] + '   系统负载 ' + str(statusInfo['cpu']['load'])
+        print '[CPU]: ' + str(statusInfo['cpu']['core']) + '核   '+ statusInfo['cpu']['hz'] + '   系统负载 '+ str(statusInfo['cpu']['load'])
         print '[MAC]: ' + statusInfo['hardware']['mac']
         print '[MEM]: Type: ' + statusInfo['mem']['type'] + '   Total: ' + statusInfo['mem']['total'] + '   Usage: ' + str(statusInfo['mem']['usage']*100) + '% \n'
-        print '--------------------[DEV]----------------------\n'
+        print '--------------------[在线设备]----------------------\n'
         for dev in devList:
             print dev['mac'] + ' ' + dev['devname']
-    except Exception,e:
+    except Exception, e:
         print e
 
 
 def getWanInfo(url):
     try:
-        wanInfo = json.loads(requests.get(url,timeout=5).content)
-        print '\n--------------------[WAN]----------------------\n'
-        print '用户: ' + wanInfo['info']['details']['username']
-        print '密码: ' + wanInfo['info']['details']['password']
-        print '类型: ' + wanInfo['info']['details']['wanType']
-        print 'IP地址: ' + wanInfo['info']['ipv4'][0]['ip']
-        print '网关: ' + wanInfo['info']['gateWay']
-        print 'DNS: ' + wanInfo['info']['dnsAddrs']+ ',' +wanInfo['info']['dnsAddrs1']
-    except Exception,e:
+        wanInfo = json.loads(requests.get(url, timeout=5).content)
+        print '\n--------------------[外网信息]----------------------\n'
+        print '用户: '+ wanInfo['info']['details']['username']
+        print '密码: '+ wanInfo['info']['details']['password']
+        print '类型: '+ wanInfo['info']['details']['wanType']
+        print 'IP地址: '+ wanInfo['info']['ipv4'][0]['ip']
+        print '网关: '+ wanInfo['info']['gateWay']
+        print 'DNS: ' + wanInfo['info']['dnsAddrs']+','+wanInfo['info']['dnsAddrs1']
+    except Exception, e:
         print e
 
 
-def doReconnect(stop,start,pppoe):
-    print '\n-----------------[Reconnect]-------------------\n'
+def doReconnect(stop, start, pppoe):
+    print '\n--------------------[重新拨号]--------------------\n'
     try:
         currentip = json.loads(requests.get(pppoe, timeout=5).content)['ip']['address']
-        print 'Current ip is ' + currentip
-        stopInfo = json.loads(requests.get(stop,timeout=5).content)
+        if len(currentip) < 1:
+            print '[*] 无法获取到IP地址，网络可能未连接...'
+        else:
+            print '[*] 当前IP地址：'+ currentip
+        stopInfo = json.loads(requests.get(stop, timeout=5).content)
         if stopInfo['code'] == 0:
-            print 'Sleep 3s...'
+            print '[*] 等待3秒...'
             time.sleep(3)
             startInfo = json.loads(requests.get(start, timeout=5).content)
             if startInfo['code'] == 0:
-                print 'Opration success... sleep 8s ...'
+                print '[*] 拨号操作成功！等待运营商返回信息...'
                 time.sleep(8)
-                newip = json.loads(requests.get(pppoe,timeout=5).content)['ip']['address']
-                print 'Success! New ip is ' +newip
+                newip = json.loads(requests.get(pppoe, timeout=5).content)['ip']['address']
+                if len(newip) < 1:
+                    print '[*] 运营商返回失败，尝试重新拨号...'
+                    doReconnect(stop, start, pppoe)
+                else:
+                    print '[*] 运营商返回拨号成功，新IP地址：' + newip
             else:
-                print 'Failed!'
+                print '[*] 出现异常！'
         else:
-            print 'Failed!'
-    except Exception,e:
-        print e
+            print '[*] 出现异常！'
+    except Exception, e:
+        print '[*] 出现异常！' + str(e)
 
 
 def doReboot(url):
     try:
         reboot = json.loads(requests.get(url, timeout=5).content)
-
         if reboot['code'] == 0:
-            print 'Rebooting...'
+            print '[*] 正在重启...'
         else:
-            print 'Reboot failed!'
-    except Exception,e:
+            print '[*] 重启失败！'
+    except Exception, e:
         print e
 
 if __name__ == '__main__':
@@ -138,10 +145,14 @@ if __name__ == '__main__':
     print '		Author 92ez.com'
     print '################################################\n'
 
-    host = sys.argv[1]
-    token = getToken(host)
+    try:
+        host = sys.argv[1]
+        token = getToken(host)
 
-    if token:
-        getInfo(host, token)
-    else:
-        print 'Login failed!'
+        if token:
+            getInfo(host, token)
+        else:
+            print '[*] 登录失败！'
+    except KeyboardInterrupt:
+        print '\n结束进程，程序已退出...'
+        sys.exit()
